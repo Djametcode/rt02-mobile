@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import api, { getImageUrl } from '../services/api';
-import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
+import { spacing, typography, radius, shadows } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = (width - spacing.lg * 2 - spacing.md) / 2;
@@ -11,6 +12,9 @@ const ProductListScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useContext(ThemeContext);
+  const c = theme.colors;
+  const g = theme.gradients;
 
   useEffect(() => {
     fetchProducts();
@@ -36,7 +40,7 @@ const ProductListScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
       activeOpacity={0.8}
     >
-      <View style={styles.productCard}>
+      <View style={[styles.productCard, { backgroundColor: c.card }]}>
         {/* Image */}
         <View style={styles.imageContainer}>
           <Image
@@ -49,7 +53,7 @@ const ProductListScreen = ({ navigation }) => {
             style={styles.imageOverlay}
           />
           {item.stock < 5 && (
-            <View style={styles.stockBadge}>
+            <View style={[styles.stockBadge, { backgroundColor: c.danger }]}>
               <Text style={styles.stockText}>Terbatas</Text>
             </View>
           )}
@@ -57,11 +61,11 @@ const ProductListScreen = ({ navigation }) => {
 
         {/* Content */}
         <View style={styles.content}>
-          <Text style={styles.category} numberOfLines={1}>{item.category}</Text>
-          <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+          <Text style={[styles.category, { color: c.textMuted }]} numberOfLines={1}>{item.category}</Text>
+          <Text style={[styles.productName, { color: c.text }]} numberOfLines={2}>{item.name}</Text>
           
           <LinearGradient
-            colors={gradients.primary}
+            colors={g.primary}
             start={{x:0,y:0}} end={{x:1,y:0}}
             style={styles.priceGradient}
           >
@@ -69,8 +73,8 @@ const ProductListScreen = ({ navigation }) => {
           </LinearGradient>
 
           <View style={styles.stockRow}>
-            <View style={[styles.stockDot, { backgroundColor: item.stock > 0 ? colors.success : colors.danger }]} />
-            <Text style={styles.stockInfo}>{item.stock > 0 ? `${item.stock} tersedia` : 'Habis'}</Text>
+            <View style={[styles.stockDot, { backgroundColor: item.stock > 0 ? c.success : c.danger }]} />
+            <Text style={[styles.stockInfo, { color: c.textMuted }]}>{item.stock > 0 ? `${item.stock} tersedia` : 'Habis'}</Text>
           </View>
         </View>
       </View>
@@ -78,26 +82,22 @@ const ProductListScreen = ({ navigation }) => {
   );
 
   return (
-    <LinearGradient colors={gradients.background} style={styles.container}>
+    <LinearGradient colors={g.background} style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>← Kembali</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Produk</Text>
-        <View style={{ width: 60 }} />
+      <View style={[styles.header, { borderBottomColor: c.border }]}>
+        <Text style={[styles.headerTitle, { color: c.text }]}>Produk</Text>
       </View>
 
       {/* Content */}
       {loading ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={c.primary} />
         </View>
       ) : error ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: c.danger }]}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={fetchProducts}>
-            <LinearGradient colors={gradients.primary} style={styles.retryGradient}>
+            <LinearGradient colors={g.primary} style={styles.retryGradient}>
               <Text style={styles.retryText}>Coba Lagi</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -120,22 +120,13 @@ const ProductListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingTop: 50,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    ...typography.bodyBold,
-    color: colors.primary,
   },
   headerTitle: {
     ...typography.h2,
-    color: colors.textMain,
   },
   centerContainer: {
     flex: 1,
@@ -144,7 +135,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...typography.body,
-    color: colors.danger,
     marginBottom: spacing.lg,
   },
   retryButton: {
@@ -157,7 +147,7 @@ const styles = StyleSheet.create({
   },
   retryText: {
     ...typography.bodyBold,
-    color: colors.white,
+    color: '#fff',
   },
   listContent: {
     paddingHorizontal: spacing.lg,
@@ -174,7 +164,6 @@ const styles = StyleSheet.create({
     ...shadows.medium,
   },
   productCard: {
-    backgroundColor: colors.card,
     borderRadius: radius.xl,
     overflow: 'hidden',
   },
@@ -199,26 +188,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: radius.sm,
   },
   stockText: {
     ...typography.caption,
-    color: colors.white,
+    color: '#fff',
   },
   content: {
     padding: spacing.md,
   },
   category: {
     ...typography.caption,
-    color: colors.textMuted,
     marginBottom: spacing.xs,
   },
   productName: {
     ...typography.bodyBold,
-    color: colors.textMain,
     marginBottom: spacing.sm,
     height: 40,
   },
@@ -230,7 +216,7 @@ const styles = StyleSheet.create({
   },
   price: {
     ...typography.bodyBold,
-    color: colors.white,
+    color: '#fff',
     fontSize: 14,
   },
   stockRow: {
@@ -245,7 +231,6 @@ const styles = StyleSheet.create({
   },
   stockInfo: {
     ...typography.small,
-    color: colors.textMuted,
   },
 });
 

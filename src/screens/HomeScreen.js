@@ -2,27 +2,31 @@ import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
+import { spacing, typography, radius, shadows } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useContext(CartContext);
+  const { theme } = useContext(ThemeContext);
+  const c = theme.colors;
+  const g = theme.gradients;
 
   return (
-    <LinearGradient colors={gradients.background} style={styles.container}>
+    <LinearGradient colors={g.background} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>rt<Text style={styles.logoAccent}>02</Text></Text>
-        {user && <Text style={styles.welcome}>Halo, {user.name}!</Text>}
+        <Text style={[styles.logo, { color: c.text }]}>rt<Text style={{ color: c.primary }}>02</Text></Text>
+        {user && <Text style={[styles.welcome, { color: c.textMuted }]}>Halo, {user.name}!</Text>}
       </View>
 
       {/* Hero */}
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Lengkapi</Text>
-        <Text style={styles.heroTitleGradient}>Rumahmu</Text>
-        <Text style={styles.heroTitle}>Bersama Kami</Text>
-        <Text style={styles.heroSubtitle}>
+        <Text style={[styles.heroTitle, { color: c.text }]}>Lengkapi</Text>
+        <Text style={[styles.heroTitle, { color: c.primary }]}>Rumahmu</Text>
+        <Text style={[styles.heroTitle, { color: c.text }]}>Bersama Kami</Text>
+        <Text style={[styles.heroSubtitle, { color: c.textMuted }]}>
           Temukan produk rumah tangga berkualitas dengan harga terbaik
         </Text>
       </View>
@@ -31,10 +35,10 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.cards}>
         <TouchableOpacity 
           style={styles.card}
-          onPress={() => navigation.navigate('ProductList')}
+          onPress={() => navigation.navigate('ProductListTab')}
           activeOpacity={0.8}
         >
-          <LinearGradient colors={['#6366f1', '#8b5cf6']} style={styles.cardGradient}>
+          <LinearGradient colors={g.primary} style={styles.cardGradient}>
             <Text style={styles.cardIcon}>🛍️</Text>
             <Text style={styles.cardTitle}>Jelajahi Produk</Text>
             <Text style={styles.cardDesc}>Lihat koleksi lengkap</Text>
@@ -43,10 +47,10 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.card}
-          onPress={() => navigation.navigate('Cart')}
+          onPress={() => navigation.navigate('CartTab')}
           activeOpacity={0.8}
         >
-          <LinearGradient colors={['#f59e0b', '#ec4899']} style={styles.cardGradient}>
+          <LinearGradient colors={g.accent} style={styles.cardGradient}>
             <Text style={styles.cardIcon}>🛒</Text>
             <Text style={styles.cardTitle}>Keranjang</Text>
             <Text style={styles.cardDesc}>Lihat belanjaan</Text>
@@ -57,10 +61,10 @@ const HomeScreen = ({ navigation }) => {
       {/* CTA */}
       <TouchableOpacity 
         style={styles.ctaWrapper}
-        onPress={() => navigation.navigate('ProductList')}
+        onPress={() => navigation.navigate('ProductListTab')}
         activeOpacity={0.9}
       >
-        <LinearGradient colors={gradients.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.cta}>
+        <LinearGradient colors={g.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.cta}>
           <Text style={styles.ctaText}>Mulai Belanja</Text>
         </LinearGradient>
       </TouchableOpacity>
@@ -68,8 +72,8 @@ const HomeScreen = ({ navigation }) => {
       {/* Login Link */}
       {!user && (
         <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginLink}>
-          <Text style={styles.loginText}>
-            Sudah punya akun? <Text style={styles.loginAccent}>Masuk</Text>
+          <Text style={[styles.loginText, { color: c.textMuted }]}>
+            Sudah punya akun? <Text style={{ color: c.primary, fontWeight: '600' }}>Masuk</Text>
           </Text>
         </TouchableOpacity>
       )}
@@ -92,29 +96,18 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 32,
     fontWeight: '800',
-    color: colors.textMain,
-  },
-  logoAccent: {
-    color: colors.primary,
   },
   welcome: {
     ...typography.body,
-    color: colors.textMuted,
   },
   hero: {
     marginBottom: spacing.xxl,
   },
   heroTitle: {
     ...typography.hero,
-    color: colors.textMain,
-  },
-  heroTitleGradient: {
-    ...typography.hero,
-    color: colors.primary,
   },
   heroSubtitle: {
     ...typography.body,
-    color: colors.textMuted,
     marginTop: spacing.md,
     lineHeight: 24,
   },
@@ -140,7 +133,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...typography.h3,
-    color: colors.white,
+    color: '#fff',
     marginBottom: spacing.xs,
   },
   cardDesc: {
@@ -159,7 +152,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     ...typography.bodyBold,
-    color: colors.white,
+    color: '#fff',
     fontSize: 16,
   },
   loginLink: {
@@ -168,11 +161,6 @@ const styles = StyleSheet.create({
   },
   loginText: {
     ...typography.body,
-    color: colors.textMuted,
-  },
-  loginAccent: {
-    color: colors.primary,
-    fontWeight: '600',
   },
 });
 

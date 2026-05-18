@@ -1,0 +1,8 @@
+AGENTS.md
+CLAUDE.md
+.cursorrules
+*.log
+.DS_Store
+node_modules/
+.expo/
+.git/

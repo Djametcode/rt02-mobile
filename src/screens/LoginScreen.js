@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvo
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../services/api';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
+import { spacing, typography, radius, shadows } from '../styles/theme';
 
 const LoginScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,51 +13,50 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useContext(CartContext);
+  const { theme } = useContext(ThemeContext);
+  const c = theme.colors;
+  const g = theme.gradients;
 
   const handleSubmit = async () => {
     if (!email || !password || (!isLogin && !name)) {
       Alert.alert('Error', 'Mohon lengkapi semua field');
       return;
     }
-
     setLoading(true);
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const payload = isLogin ? { email, password } : { name, email, password };
       const { data } = await api.post(endpoint, payload);
-
       await login(data.token, data);
-
       Alert.alert(
         'Berhasil',
         isLogin ? 'Login Berhasil!' : 'Registrasi Berhasil!',
-        [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
+        [{ text: 'OK', onPress: () => navigation.navigate('Tabs') }]
       );
     } catch (error) {
-      Alert.alert(
-        'Gagal',
-        error.response?.data?.message || 'Terjadi kesalahan pada server'
-      );
+      Alert.alert('Gagal', error.response?.data?.message || 'Terjadi kesalahan');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <LinearGradient colors={gradients.background} style={styles.container}>
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.authCard}>
+    <LinearGradient colors={g.background} style={styles.container}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* Back Button */}
+          <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            style={[styles.backBtn, { backgroundColor: c.card }]}
+          >
+            <Text style={[styles.backText, { color: c.text }]}>←</Text>
+          </TouchableOpacity>
+
+          <View style={[styles.authCard, { backgroundColor: c.card }]}>
             {/* Logo */}
             <View style={styles.header}>
-              <Text style={styles.logo}>rt<Text style={styles.logoAccent}>02</Text></Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.logo, { color: c.text }]}>rt<Text style={{ color: c.primary }}>02</Text></Text>
+              <Text style={[styles.subtitle, { color: c.textMuted }]}>
                 {isLogin ? 'Selamat datang kembali' : 'Buat akun baru'}
               </Text>
             </View>
@@ -64,14 +64,14 @@ const LoginScreen = ({ navigation }) => {
             {/* Form */}
             {!isLogin && (
               <View style={styles.formGroup}>
-                <Text style={styles.label}>Nama Lengkap</Text>
-                <View style={styles.inputWrapper}>
+                <Text style={[styles.label, { color: c.textSecondary }]}>Nama Lengkap</Text>
+                <View style={[styles.inputWrapper, { backgroundColor: c.background, borderColor: c.border }]}>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: c.text }]}
                     value={name}
                     onChangeText={setName}
                     placeholder="John Doe"
-                    placeholderTextColor={colors.textSubtle}
+                    placeholderTextColor={c.textSubtle}
                     autoCapitalize="words"
                   />
                 </View>
@@ -79,14 +79,14 @@ const LoginScreen = ({ navigation }) => {
             )}
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Email</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: c.textSecondary }]}>Email</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: c.background, borderColor: c.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: c.text }]}
                   value={email}
                   onChangeText={setEmail}
                   placeholder="email@example.com"
-                  placeholderTextColor={colors.textSubtle}
+                  placeholderTextColor={c.textSubtle}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
@@ -94,44 +94,38 @@ const LoginScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.inputWrapper}>
+              <Text style={[styles.label, { color: c.textSecondary }]}>Password</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: c.background, borderColor: c.border }]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: c.text }]}
                   value={password}
                   onChangeText={setPassword}
                   placeholder="••••••••"
-                  placeholderTextColor={colors.textSubtle}
+                  placeholderTextColor={c.textSubtle}
                   secureTextEntry
                 />
               </View>
             </View>
 
-            {/* Submit */}
             <TouchableOpacity 
               style={[styles.submitWrapper, loading && { opacity: 0.6 }]}
               onPress={handleSubmit}
               disabled={loading}
               activeOpacity={0.8}
             >
-              <LinearGradient
-                colors={gradients.primary}
-                start={{x:0,y:0}} end={{x:1,y:0}}
-                style={styles.submitBtn}
-              >
+              <LinearGradient colors={g.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.submitBtn}>
                 <Text style={styles.submitText}>
                   {loading ? 'Memproses...' : (isLogin ? 'Masuk' : 'Daftar')}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Switch */}
             <View style={styles.switch}>
-              <Text style={styles.switchText}>
+              <Text style={[styles.switchText, { color: c.textMuted }]}>
                 {isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? '}
               </Text>
               <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                <Text style={styles.switchLink}>
+                <Text style={[styles.switchLink, { color: c.primaryLight }]}>
                   {isLogin ? 'Daftar' : 'Masuk'}
                 </Text>
               </TouchableOpacity>
@@ -145,87 +139,39 @@ const LoginScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: spacing.lg,
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
+  backBtn: {
+    position: 'absolute', top: 50, left: spacing.lg,
+    width: 44, height: 44, borderRadius: 22,
+    justifyContent: 'center', alignItems: 'center',
+    ...shadows.small,
   },
+  backText: { fontSize: 22, fontWeight: '600' },
   authCard: {
-    backgroundColor: colors.card,
-    padding: spacing.xl,
-    borderRadius: radius.xxl,
+    padding: spacing.xl, borderRadius: radius.xxl,
     ...shadows.large,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  logo: {
-    fontSize: 48,
-    fontWeight: '800',
-    color: colors.textMain,
-    letterSpacing: -1,
-  },
-  logoAccent: {
-    color: colors.primary,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  formGroup: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    ...typography.bodyBold,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-    fontSize: 14,
-  },
+  header: { alignItems: 'center', marginBottom: spacing.xl },
+  logo: { fontSize: 48, fontWeight: '800', letterSpacing: -1 },
+  subtitle: { ...typography.body, marginTop: spacing.xs },
+  formGroup: { marginBottom: spacing.md },
+  label: { ...typography.bodyBold, marginBottom: spacing.xs, fontSize: 14 },
   inputWrapper: {
-    backgroundColor: colors.background,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
+    borderRadius: radius.md, borderWidth: 1, overflow: 'hidden',
   },
   input: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 14,
+    paddingHorizontal: spacing.md, paddingVertical: 14,
     fontSize: 15,
-    color: colors.white,
   },
   submitWrapper: {
-    marginTop: spacing.md,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    ...shadows.medium,
+    marginTop: spacing.md, borderRadius: radius.full,
+    overflow: 'hidden', ...shadows.medium,
   },
-  submitBtn: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderRadius: radius.full,
-  },
-  submitText: {
-    ...typography.bodyBold,
-    color: colors.white,
-    fontSize: 16,
-  },
-  switch: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
-  },
-  switchText: {
-    ...typography.body,
-    color: colors.textMuted,
-  },
-  switchLink: {
-    ...typography.body,
-    color: colors.primaryLight,
-    fontWeight: '700',
-  },
+  submitBtn: { paddingVertical: 16, alignItems: 'center', borderRadius: radius.full },
+  submitText: { ...typography.bodyBold, color: '#fff', fontSize: 16 },
+  switch: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg },
+  switchText: { ...typography.body },
+  switchLink: { ...typography.body, fontWeight: '700' },
 });
 
 export default LoginScreen;

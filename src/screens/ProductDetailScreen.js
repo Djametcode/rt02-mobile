@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIn
 import { LinearGradient } from 'expo-linear-gradient';
 import api, { getImageUrl } from '../services/api';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
+import { ThemeContext } from '../context/ThemeContext';
+import { spacing, typography, radius, shadows } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -13,10 +14,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const { addToCart, user } = useContext(CartContext);
+  const { theme } = useContext(ThemeContext);
+  const c = theme.colors;
+  const g = theme.gradients;
 
-  useEffect(() => {
-    fetchProduct();
-  }, [productId]);
+  useEffect(() => { fetchProduct(); }, [productId]);
 
   const fetchProduct = async () => {
     try {
@@ -37,15 +39,13 @@ const ProductDetailScreen = ({ route, navigation }) => {
       ]);
       return;
     }
-
     setAdding(true);
     const result = await addToCart(productId, 1);
     setAdding(false);
-
     if (result.success) {
       Alert.alert('Berhasil', 'Produk ditambahkan ke keranjang', [
-        { text: 'Lanjut Belanja', style: 'cancel' },
-        { text: 'Lihat Keranjang', onPress: () => navigation.navigate('Cart') }
+        { text: 'Lanjut', style: 'cancel' },
+        { text: 'Lihat Keranjang', onPress: () => navigation.navigate('CartTab') }
       ]);
     } else {
       Alert.alert('Gagal', result.error || 'Gagal menambah ke keranjang');
@@ -54,68 +54,51 @@ const ProductDetailScreen = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <LinearGradient colors={gradients.background} style={styles.container}>
+      <LinearGradient colors={g.background} style={styles.container}>
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={c.primary} />
         </View>
       </LinearGradient>
     );
   }
-
   if (!product) return null;
 
   return (
-    <LinearGradient colors={gradients.background} style={styles.container}>
+    <LinearGradient colors={g.background} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
         <View style={styles.imageWrapper}>
-          <Image
-            source={{ uri: getImageUrl(product.imageUrl) }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-          <LinearGradient
-            colors={['transparent', colors.background]}
-            style={styles.imageOverlay}
-          />
-          
-          {/* Back button */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Text style={styles.backText}>←</Text>
+          <Image source={{ uri: getImageUrl(product.imageUrl) }} style={styles.heroImage} resizeMode="cover" />
+          <LinearGradient colors={['transparent', c.background]} style={styles.imageOverlay} />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backButton, { backgroundColor: c.card }]}>
+            <Text style={[styles.backText, { color: c.text }]}>←</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Content */}
         <View style={styles.content}>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.category}>{product.category}</Text>
+          <View style={[styles.categoryBadge, { backgroundColor: c.card }]}>
+            <Text style={[styles.category, { color: c.textMuted }]}>{product.category}</Text>
           </View>
 
-          <Text style={styles.productName}>{product.name}</Text>
+          <Text style={[styles.productName, { color: c.text }]}>{product.name}</Text>
 
-          <LinearGradient
-            colors={gradients.primary}
-            start={{x:0,y:0}} end={{x:1,y:0}}
-            style={styles.priceGradient}
-          >
+          <LinearGradient colors={g.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.priceGradient}>
             <Text style={styles.priceText}>Rp {product.price.toLocaleString('id-ID')}</Text>
           </LinearGradient>
 
           <View style={styles.stockRow}>
-            <View style={[styles.stockDot, { backgroundColor: product.stock > 0 ? colors.success : colors.danger }]} />
-            <Text style={styles.stockText}>
+            <View style={[styles.stockDot, { backgroundColor: product.stock > 0 ? c.success : c.danger }]} />
+            <Text style={[styles.stockText, { color: c.textSecondary }]}>
               {product.stock > 0 ? `${product.stock} stok tersedia` : 'Stok habis'}
             </Text>
           </View>
 
-          <View style={styles.divider} />
-          <Text style={styles.sectionTitle}>Deskripsi</Text>
-          <Text style={styles.description}>{product.description}</Text>
+          <View style={[styles.divider, { backgroundColor: c.border }]} />
+          <Text style={[styles.sectionTitle, { color: c.text }]}>Deskripsi</Text>
+          <Text style={[styles.description, { color: c.textSecondary }]}>{product.description}</Text>
         </View>
       </ScrollView>
 
-      {/* Bottom CTA */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { backgroundColor: c.background, borderTopColor: c.border }]}>
         <TouchableOpacity
           onPress={handleAddToCart}
           disabled={adding || product.stock === 0}
@@ -123,7 +106,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={product.stock === 0 ? ['#666', '#444'] : gradients.primary}
+            colors={product.stock === 0 ? ['#666', '#444'] : g.primary}
             start={{x:0,y:0}} end={{x:1,y:0}}
             style={styles.ctaButton}
           >
@@ -140,124 +123,44 @@ const ProductDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  imageWrapper: {
-    width: '100%',
-    height: width,
-    position: 'relative',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    height: '40%',
-  },
+  imageWrapper: { width: '100%', height: width, position: 'relative' },
+  heroImage: { width: '100%', height: '100%' },
+  imageOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%' },
   backButton: {
-    position: 'absolute',
-    top: 50,
-    left: spacing.lg,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute', top: 50, left: spacing.lg,
+    width: 44, height: 44, borderRadius: 22,
+    justifyContent: 'center', alignItems: 'center',
     ...shadows.medium,
   },
-  backText: {
-    color: colors.white,
-    fontSize: 22,
-    fontWeight: '600',
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 120,
-  },
+  backText: { fontSize: 22, fontWeight: '600' },
+  content: { padding: spacing.lg, paddingBottom: 120 },
   categoryBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.card,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: radius.full,
-    marginBottom: spacing.md,
+    paddingVertical: 6, paddingHorizontal: 14,
+    borderRadius: radius.full, marginBottom: spacing.md,
   },
-  category: {
-    ...typography.caption,
-    color: colors.textMuted,
-  },
-  productName: {
-    ...typography.h1,
-    color: colors.textMain,
-    marginBottom: spacing.lg,
-  },
+  category: { ...typography.caption },
+  productName: { ...typography.h1, marginBottom: spacing.lg },
   priceGradient: {
     alignSelf: 'flex-start',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: radius.md,
-    marginBottom: spacing.md,
+    paddingVertical: 10, paddingHorizontal: 18,
+    borderRadius: radius.md, marginBottom: spacing.md,
   },
-  priceText: {
-    ...typography.h2,
-    color: colors.white,
-  },
-  stockRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  stockDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  stockText: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: spacing.lg,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    color: colors.textMain,
-    marginBottom: spacing.sm,
-  },
-  description: {
-    ...typography.body,
-    color: colors.textSecondary,
-    lineHeight: 24,
-  },
+  priceText: { ...typography.h2, color: '#fff' },
+  stockRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
+  stockDot: { width: 8, height: 8, borderRadius: 4 },
+  stockText: { ...typography.body },
+  divider: { height: 1, marginVertical: spacing.lg },
+  sectionTitle: { ...typography.h3, marginBottom: spacing.sm },
+  description: { ...typography.body, lineHeight: 24 },
   bottomBar: {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: 30,
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 30,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
-  ctaWrapper: {
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    ...shadows.medium,
-  },
-  ctaButton: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderRadius: radius.full,
-  },
-  ctaText: {
-    ...typography.bodyBold,
-    color: colors.white,
-    fontSize: 16,
-  },
+  ctaWrapper: { borderRadius: radius.full, overflow: 'hidden', ...shadows.medium },
+  ctaButton: { paddingVertical: 16, alignItems: 'center', borderRadius: radius.full },
+  ctaText: { ...typography.bodyBold, color: '#fff', fontSize: 16 },
 });
 
 export default ProductDetailScreen;
