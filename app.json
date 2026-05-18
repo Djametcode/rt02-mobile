@@ -24,6 +24,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b5667b8e-bcab-4422-8bfc-0fb870eeee5e"
+      }
+    },
+    "owner": "djametcode",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b5667b8e-bcab-4422-8bfc-0fb870eeee5e"
     }
   }
 }
