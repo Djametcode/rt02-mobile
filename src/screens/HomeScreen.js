@@ -1,138 +1,178 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, shadows } from '../styles/theme';
+import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
+
+const { width } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useContext(CartContext);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.hero}>
-        <View style={styles.heroContent}>
-          <Text style={styles.tagline}>Solusi Cerdas Rumah Tangga</Text>
-          <Text style={styles.title}>
-            Lengkapi Rumahmu{'\n'}Bersama <Text style={styles.brand}>rt02</Text>
-          </Text>
-          <Text style={styles.description}>
-            Temukan peralatan rumah tangga modern dengan desain minimalis dan kualitas terjamin untuk keluarga Indonesia.
-          </Text>
-
-          <View style={styles.buttonGroup}>
-            <TouchableOpacity 
-              style={styles.btnPrimary}
-              onPress={() => navigation.navigate('ProductList')}
-            >
-              <Text style={styles.btnPrimaryText}>Mulai Belanja</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.btnOutline}
-              onPress={() => navigation.navigate(user ? 'Cart' : 'Login')}
-            >
-              <Text style={styles.btnOutlineText}>
-                {user ? 'Lihat Keranjangmu' : 'Daftar Akun'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.heroImageContainer}>
-          <View style={styles.imageBlob}>
-            <Image 
-              source={{ uri: 'https://online-marketplace02-bwri.vercel.app/gambar-hero.jpg' }}
-              style={styles.heroImage}
-              resizeMode="cover"
-            />
-          </View>
-        </View>
+    <LinearGradient colors={gradients.background} style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>rt<Text style={styles.logoAccent}>02</Text></Text>
+        {user && <Text style={styles.welcome}>Halo, {user.name}!</Text>}
       </View>
-    </ScrollView>
+
+      {/* Hero */}
+      <View style={styles.hero}>
+        <Text style={styles.heroTitle}>Lengkapi</Text>
+        <Text style={styles.heroTitleGradient}>Rumahmu</Text>
+        <Text style={styles.heroTitle}>Bersama Kami</Text>
+        <Text style={styles.heroSubtitle}>
+          Temukan produk rumah tangga berkualitas dengan harga terbaik
+        </Text>
+      </View>
+
+      {/* Action Cards */}
+      <View style={styles.cards}>
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => navigation.navigate('ProductList')}
+          activeOpacity={0.8}
+        >
+          <LinearGradient colors={['#6366f1', '#8b5cf6']} style={styles.cardGradient}>
+            <Text style={styles.cardIcon}>🛍️</Text>
+            <Text style={styles.cardTitle}>Jelajahi Produk</Text>
+            <Text style={styles.cardDesc}>Lihat koleksi lengkap</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => navigation.navigate('Cart')}
+          activeOpacity={0.8}
+        >
+          <LinearGradient colors={['#f59e0b', '#ec4899']} style={styles.cardGradient}>
+            <Text style={styles.cardIcon}>🛒</Text>
+            <Text style={styles.cardTitle}>Keranjang</Text>
+            <Text style={styles.cardDesc}>Lihat belanjaan</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      {/* CTA */}
+      <TouchableOpacity 
+        style={styles.ctaWrapper}
+        onPress={() => navigation.navigate('ProductList')}
+        activeOpacity={0.9}
+      >
+        <LinearGradient colors={gradients.primary} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.cta}>
+          <Text style={styles.ctaText}>Mulai Belanja</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {/* Login Link */}
+      {!user && (
+        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginLink}>
+          <Text style={styles.loginText}>
+            Sudah punya akun? <Text style={styles.loginAccent}>Masuk</Text>
+          </Text>
+        </TouchableOpacity>
+      )}
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    paddingTop: 60,
+    paddingHorizontal: spacing.lg,
   },
-  content: {
-    paddingBottom: spacing.xl,
-  },
-  hero: {
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  heroContent: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.xl,
   },
-  tagline: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
+  logo: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: colors.textMain,
   },
-  title: {
-    ...typography.h1,
-    fontSize: 36,
-    lineHeight: 44,
-    marginBottom: spacing.md,
-  },
-  brand: {
+  logoAccent: {
     color: colors.primary,
   },
-  description: {
+  welcome: {
     ...typography.body,
     color: colors.textMuted,
+  },
+  hero: {
+    marginBottom: spacing.xxl,
+  },
+  heroTitle: {
+    ...typography.hero,
+    color: colors.textMain,
+  },
+  heroTitleGradient: {
+    ...typography.hero,
+    color: colors.primary,
+  },
+  heroSubtitle: {
+    ...typography.body,
+    color: colors.textMuted,
+    marginTop: spacing.md,
     lineHeight: 24,
+  },
+  cards: {
+    flexDirection: 'row',
+    gap: spacing.md,
     marginBottom: spacing.xl,
   },
-  buttonGroup: {
-    gap: spacing.md,
-  },
-  btnPrimary: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 12,
-    alignItems: 'center',
-    ...shadows.small,
-  },
-  btnPrimaryText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  btnOutline: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  btnOutlineText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  heroImageContainer: {
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  imageBlob: {
-    width: 280,
-    height: 280,
-    borderRadius: 140,
+  card: {
+    flex: 1,
+    borderRadius: radius.xl,
     overflow: 'hidden',
-    backgroundColor: colors.primary + '20',
     ...shadows.medium,
   },
-  heroImage: {
-    width: '100%',
-    height: '100%',
+  cardGradient: {
+    padding: spacing.lg,
+    minHeight: 140,
+    borderRadius: radius.xl,
+  },
+  cardIcon: {
+    fontSize: 32,
+    marginBottom: spacing.sm,
+  },
+  cardTitle: {
+    ...typography.h3,
+    color: colors.white,
+    marginBottom: spacing.xs,
+  },
+  cardDesc: {
+    ...typography.small,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  ctaWrapper: {
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    ...shadows.medium,
+  },
+  cta: {
+    paddingVertical: 18,
+    alignItems: 'center',
+    borderRadius: radius.full,
+  },
+  ctaText: {
+    ...typography.bodyBold,
+    color: colors.white,
+    fontSize: 16,
+  },
+  loginLink: {
+    marginTop: spacing.xl,
+    alignSelf: 'center',
+  },
+  loginText: {
+    ...typography.body,
+    color: colors.textMuted,
+  },
+  loginAccent: {
+    color: colors.primary,
+    fontWeight: '600',
   },
 });
 

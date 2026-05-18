@@ -1,7 +1,9 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, shadows } from '../styles/theme';
+import { getImageUrl } from '../services/api';
+import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
 
 const CartScreen = ({ navigation }) => {
   const { cartItems, removeFromCart, clearCart, fetchCart, user } = useContext(CartContext);
@@ -12,18 +14,25 @@ const CartScreen = ({ navigation }) => {
 
   if (!user) {
     return (
-      <View style={styles.unauthorized}>
-        <Text style={styles.unauthTitle}>Akses Ditolak</Text>
-        <Text style={styles.unauthMessage}>
-          Anda harus login terlebih dahulu untuk melihat dan mengelola keranjang belanja Anda.
-        </Text>
-        <TouchableOpacity 
-          style={styles.loginBtn}
-          onPress={() => navigation.navigate('Login')}
-        >
-          <Text style={styles.loginBtnText}>Pergi ke Halaman Login</Text>
-        </TouchableOpacity>
-      </View>
+      <LinearGradient colors={gradients.background} style={styles.container}>
+        <View style={styles.centerContainer}>
+          <View style={styles.messageCard}>
+            <Text style={styles.messageIcon}>🔒</Text>
+            <Text style={styles.messageTitle}>Login Diperlukan</Text>
+            <Text style={styles.messageText}>
+              Silakan login untuk melihat keranjang belanja
+            </Text>
+            <TouchableOpacity 
+              style={styles.ctaWrapper}
+              onPress={() => navigation.navigate('Login')}
+            >
+              <LinearGradient colors={gradients.primary} style={styles.ctaButton}>
+                <Text style={styles.ctaText}>Login Sekarang</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
     );
   }
 
@@ -42,94 +51,224 @@ const CartScreen = ({ navigation }) => {
 
   if (validItems.length === 0) {
     return (
-      <View style={styles.empty}>
-        <Text style={styles.emptyTitle}>Keranjang Kosong</Text>
-        <Text style={styles.emptyMessage}>
-          Keranjang Anda masih kosong. Yuk, cari barang impianmu!
-        </Text>
-        <TouchableOpacity 
-          style={styles.shopBtn}
-          onPress={() => navigation.navigate('ProductList')}
-        >
-          <Text style={styles.shopBtnText}>Mulai Belanja</Text>
-        </TouchableOpacity>
-      </View>
+      <LinearGradient colors={gradients.background} style={styles.container}>
+        <View style={styles.centerContainer}>
+          <View style={styles.messageCard}>
+            <Text style={styles.messageIcon}>🛒</Text>
+            <Text style={styles.messageTitle}>Keranjang Kosong</Text>
+            <Text style={styles.messageText}>
+              Belum ada produk di keranjang. Yuk mulai belanja!
+            </Text>
+            <TouchableOpacity 
+              style={styles.ctaWrapper}
+              onPress={() => navigation.navigate('ProductList')}
+            >
+              <LinearGradient colors={gradients.primary} style={styles.ctaButton}>
+                <Text style={styles.ctaText}>Mulai Belanja</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
     );
   }
 
   const renderItem = ({ item }) => (
     <View style={styles.cartItem}>
+      <Image
+        source={{ uri: getImageUrl(item.product.imageUrl) }}
+        style={styles.itemImage}
+        resizeMode="cover"
+      />
       <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.product.name}</Text>
-        <Text style={styles.itemQty}>x{item.quantity}</Text>
+        <Text style={styles.itemName} numberOfLines={2}>{item.product.name}</Text>
+        <View style={styles.itemMeta}>
+          <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
+          <Text style={styles.itemPrice}>{formatPrice(item.product.price * item.quantity)}</Text>
+        </View>
       </View>
-      <View style={styles.itemAction}>
-        <Text style={styles.itemPrice}>
-          {formatPrice(item.product.price * item.quantity)}
-        </Text>
-        <TouchableOpacity 
-          style={styles.removeBtn}
-          onPress={() => removeFromCart(item.product._id)}
-        >
-          <Text style={styles.removeBtnText}>Hapus</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity 
+        style={styles.removeBtn}
+        onPress={() => removeFromCart(item.product._id)}
+      >
+        <Text style={styles.removeText}>✕</Text>
+      </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Keranjang Belanja Anda</Text>
-      
+    <LinearGradient colors={gradients.background} style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backButton}>← Kembali</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Keranjang</Text>
+        <View style={{ width: 60 }} />
+      </View>
+
       <FlatList
         data={validItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.product._id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
       />
 
+      {/* Bottom Summary */}
       <View style={styles.summary}>
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total Belanja:</Text>
-          <Text style={styles.totalValue}>{formatPrice(total)}</Text>
+          <Text style={styles.totalLabel}>Total Belanja</Text>
+          <LinearGradient
+            colors={gradients.primary}
+            start={{x:0,y:0}} end={{x:1,y:0}}
+            style={styles.totalBadge}
+          >
+            <Text style={styles.totalValue}>{formatPrice(total)}</Text>
+          </LinearGradient>
         </View>
-        <TouchableOpacity style={styles.checkoutBtn} onPress={handleCheckout}>
-          <Text style={styles.checkoutBtnText}>Proses Checkout</Text>
+        
+        <TouchableOpacity 
+          style={styles.checkoutWrapper}
+          onPress={handleCheckout}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={gradients.accent}
+            start={{x:0,y:0}} end={{x:1,y:0}}
+            style={styles.checkoutBtn}
+          >
+            <Text style={styles.checkoutText}>Checkout Sekarang</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  title: { ...typography.h2, padding: spacing.lg, paddingBottom: spacing.md },
-  list: { paddingHorizontal: spacing.lg },
-  cartItem: {
-    backgroundColor: colors.cardBg,
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.sm,
+  container: { flex: 1 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: 50,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  backButton: {
+    ...typography.bodyBold,
+    color: colors.primary,
+  },
+  headerTitle: {
+    ...typography.h2,
+    color: colors.textMain,
+  },
+  messageCard: {
+    backgroundColor: colors.card,
+    padding: spacing.xl,
+    borderRadius: radius.xxl,
+    alignItems: 'center',
+    ...shadows.large,
+  },
+  messageIcon: {
+    fontSize: 64,
+    marginBottom: spacing.md,
+  },
+  messageTitle: {
+    ...typography.h2,
+    color: colors.textMain,
+    marginBottom: spacing.sm,
+  },
+  messageText: {
+    ...typography.body,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  ctaWrapper: {
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    ...shadows.medium,
+  },
+  ctaButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: radius.full,
+  },
+  ctaText: {
+    ...typography.bodyBold,
+    color: colors.white,
+  },
+  list: {
+    padding: spacing.lg,
+    paddingBottom: 140,
+  },
+  cartItem: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    padding: spacing.md,
+    borderRadius: radius.xl,
+    marginBottom: spacing.md,
+    alignItems: 'center',
     ...shadows.small,
   },
-  itemInfo: { flex: 1 },
-  itemName: { ...typography.body, fontWeight: '600', marginBottom: 4 },
-  itemQty: { ...typography.caption },
-  itemAction: { alignItems: 'flex-end' },
-  itemPrice: { fontSize: 16, fontWeight: '700', color: colors.primary, marginBottom: spacing.xs },
-  removeBtn: {
-    backgroundColor: colors.error,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+  itemImage: {
+    width: 70,
+    height: 70,
+    borderRadius: radius.md,
+    marginRight: spacing.md,
   },
-  removeBtnText: { color: colors.white, fontSize: 12, fontWeight: '600' },
+  itemInfo: {
+    flex: 1,
+  },
+  itemName: {
+    ...typography.bodyBold,
+    color: colors.textMain,
+    marginBottom: spacing.xs,
+  },
+  itemMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemQty: {
+    ...typography.small,
+    color: colors.textMuted,
+  },
+  itemPrice: {
+    ...typography.bodyBold,
+    color: colors.primaryLight,
+  },
+  removeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing.sm,
+  },
+  removeText: {
+    color: colors.danger,
+    fontSize: 16,
+    fontWeight: '700',
+  },
   summary: {
-    backgroundColor: colors.cardBg,
-    padding: spacing.lg,
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: 30,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
@@ -139,58 +278,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
-  totalLabel: { ...typography.h3 },
-  totalValue: { fontSize: 24, fontWeight: '700', color: colors.primary },
+  totalLabel: {
+    ...typography.h3,
+    color: colors.textSecondary,
+  },
+  totalBadge: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: radius.md,
+  },
+  totalValue: {
+    ...typography.h3,
+    color: colors.white,
+  },
+  checkoutWrapper: {
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    ...shadows.medium,
+  },
   checkoutBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: 'center',
-    ...shadows.small,
+    borderRadius: radius.full,
   },
-  checkoutBtnText: { color: colors.white, fontSize: 16, fontWeight: '600' },
-  unauthorized: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
+  checkoutText: {
+    ...typography.bodyBold,
+    color: colors.white,
+    fontSize: 16,
   },
-  unauthTitle: { ...typography.h2, marginBottom: spacing.md },
-  unauthMessage: {
-    ...typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  loginBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 12,
-  },
-  loginBtnText: { color: colors.white, fontWeight: '600' },
-  empty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  emptyTitle: { ...typography.h2, marginBottom: spacing.sm },
-  emptyMessage: {
-    ...typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  shopBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 12,
-  },
-  shopBtnText: { color: colors.white, fontWeight: '600' },
 });
 
 export default CartScreen;

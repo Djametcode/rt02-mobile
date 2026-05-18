@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import api from '../services/api';
 import { CartContext } from '../context/CartContext';
-import { colors, spacing, typography, shadows } from '../styles/theme';
+import { colors, spacing, typography, radius, shadows, gradients } from '../styles/theme';
 
 const LoginScreen = ({ navigation }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -42,106 +43,128 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.authBox}>
-          <View style={styles.header}>
-            <Text style={styles.logo}>rt<Text style={styles.logoAccent}>02</Text></Text>
-            <Text style={styles.subtitle}>
-              {isLogin ? 'Silakan masuk ke akun Anda' : 'Buat akun baru Anda'}
-            </Text>
-          </View>
-
-          {!isLogin && (
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Nama Lengkap</Text>
-              <TextInput
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
-                placeholder="Masukkan nama lengkap"
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="words"
-              />
-            </View>
-          )}
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="email@example.com"
-              placeholderTextColor={colors.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Masukkan password"
-              placeholderTextColor={colors.textMuted}
-              secureTextEntry
-            />
-          </View>
-
-          <TouchableOpacity 
-            style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            <Text style={styles.submitBtnText}>
-              {loading ? 'Memproses...' : (isLogin ? 'Masuk' : 'Daftar')}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.switch}>
-            <Text style={styles.switchText}>
-              {isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? '}
-            </Text>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text style={styles.switchLink}>
-                {isLogin ? 'Daftar' : 'Masuk'}
+    <LinearGradient colors={gradients.background} style={styles.container}>
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.authCard}>
+            {/* Logo */}
+            <View style={styles.header}>
+              <Text style={styles.logo}>rt<Text style={styles.logoAccent}>02</Text></Text>
+              <Text style={styles.subtitle}>
+                {isLogin ? 'Selamat datang kembali' : 'Buat akun baru'}
               </Text>
+            </View>
+
+            {/* Form */}
+            {!isLogin && (
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Nama Lengkap</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="John Doe"
+                    placeholderTextColor={colors.textSubtle}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
+            )}
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Email</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="email@example.com"
+                  placeholderTextColor={colors.textSubtle}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.textSubtle}
+                  secureTextEntry
+                />
+              </View>
+            </View>
+
+            {/* Submit */}
+            <TouchableOpacity 
+              style={[styles.submitWrapper, loading && { opacity: 0.6 }]}
+              onPress={handleSubmit}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={gradients.primary}
+                start={{x:0,y:0}} end={{x:1,y:0}}
+                style={styles.submitBtn}
+              >
+                <Text style={styles.submitText}>
+                  {loading ? 'Memproses...' : (isLogin ? 'Masuk' : 'Daftar')}
+                </Text>
+              </LinearGradient>
             </TouchableOpacity>
+
+            {/* Switch */}
+            <View style={styles.switch}>
+              <Text style={styles.switchText}>
+                {isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? '}
+              </Text>
+              <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+                <Text style={styles.switchLink}>
+                  {isLogin ? 'Daftar' : 'Masuk'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  authBox: {
-    backgroundColor: colors.cardBg,
-    borderRadius: 16,
+  authCard: {
+    backgroundColor: colors.card,
     padding: spacing.xl,
-    ...shadows.medium,
+    borderRadius: radius.xxl,
+    ...shadows.large,
   },
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
   logo: {
-    fontSize: 40,
-    fontWeight: '700',
+    fontSize: 48,
+    fontWeight: '800',
     color: colors.textMain,
-    marginBottom: spacing.sm,
+    letterSpacing: -1,
   },
   logoAccent: {
     color: colors.primary,
@@ -149,40 +172,45 @@ const styles = StyleSheet.create({
   subtitle: {
     ...typography.body,
     color: colors.textMuted,
-    textAlign: 'center',
+    marginTop: spacing.xs,
   },
   formGroup: {
     marginBottom: spacing.md,
   },
   label: {
-    ...typography.body,
-    fontWeight: '600',
+    ...typography.bodyBold,
+    color: colors.textSecondary,
     marginBottom: spacing.xs,
+    fontSize: 14,
   },
-  input: {
+  inputWrapper: {
+    backgroundColor: colors.background,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
-    padding: spacing.md,
-    fontSize: 16,
-    color: colors.textMain,
-    backgroundColor: colors.background,
+    overflow: 'hidden',
+  },
+  input: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: colors.white,
+  },
+  submitWrapper: {
+    marginTop: spacing.md,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    ...shadows.medium,
   },
   submitBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginTop: spacing.md,
-    ...shadows.small,
+    borderRadius: radius.full,
   },
-  submitBtnDisabled: {
-    opacity: 0.7,
-  },
-  submitBtnText: {
+  submitText: {
+    ...typography.bodyBold,
     color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
   },
   switch: {
     flexDirection: 'row',
@@ -195,8 +223,8 @@ const styles = StyleSheet.create({
   },
   switchLink: {
     ...typography.body,
-    color: colors.primary,
-    fontWeight: '600',
+    color: colors.primaryLight,
+    fontWeight: '700',
   },
 });
 
